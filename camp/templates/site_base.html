@@ -1,0 +1,62 @@
+{% extends "theme_bootstrap/base.html" %}
+
+{% load staticfiles %}
+
+{% load url from future %}
+
+{% load metron_tags %}
+{% load i18n %}
+
+{% block extra_head_base %}
+    {% block extra_head %}    
+    {% endblock %}
+{% endblock %}
+
+{% block topbar_base %}
+	<div class="navbar {% block navbar_class %}navbar-fixed-top{% endblock %}">
+		<div class="navbar-inner">
+        	<div class="container">
+            	{% block topbar %}
+                	<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    	<span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    
+                    {% block site_brand %}<a class="brand" href="{% url "home" %}">{{ SITE_NAME }}</a>{% endblock %}
+                    
+                    <div class="nav-collapse">
+                    	
+                        {% block nav %}
+                                        
+                        	<ul class="nav">
+                            	<li><a href="http://hivedirect.com/">HiveDirect</a></li>
+                                <li><a href="{% url "tos" %}">Terms of Service</a></li>
+                                {% comment %}
+                                <li><a href="">About Us</a></li>
+                                {% endcomment %}
+                                <li><a href="{% url "contact" %}">Contact</a></li>
+                            </ul>
+                                        
+                        {% endblock %}
+
+                        {% comment %}{% endcomment %}
+                        {% block account_bar %}{% include "_account_bar.html" %}{% endblock %}
+                        
+                    </div>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    {% include "_footer.html" %}
+{% endblock %}
+ø
+
+{% block extra_body_base %}
+    {% analytics %}
+    {% block extra_body %}
+    {% endblock %}
+{% endblock %}

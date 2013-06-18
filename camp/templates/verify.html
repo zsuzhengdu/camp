@@ -1,0 +1,39 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Welcome" %}{% endblock %}
+
+{% block body_class %}Worker verify{% endblock %}
+
+{% block body %}
+    <div class="row" style="margin-top:30px;">
+        <div class="span8">
+            <p>
+            <h4>Instructions: Play the given video file and verify everything you see on the text area.
+            </h4>
+            </p>    
+        </div> 
+
+        <!-- Video  -->    
+        <div class="span8">
+            {% include "player.html" %}
+        </div>   
+        
+        <div class="span4">
+            <form method="POST" action="{% url verify video.id %}" autocapitalize="off" class="form-horizontal"{% if form.is_multipart %} enctype="multipart/form-data"{% endif %}>
+               
+                {% csrf_token %}
+                {{ form }}
+                {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+                <div class="form-actions">                    
+                    <button type="submit" class="btn btn-primary">{% trans "Submit Verifying Task" %}</button>
+                </div>
+            </form>            
+        </div>
+    
+    </div>   
+
+{% endblock %}

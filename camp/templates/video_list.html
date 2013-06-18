@@ -1,0 +1,38 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Welcome" %}{% endblock %}
+
+{% block body_class %}home{% endblock %}
+
+{% block body %}
+
+<ul>
+    {% for video in videos %}
+    <li><a href={% url video_details video.id %}>{{ video.videoname }} ---- {{ video.videostate }}</a></li>
+    {% endfor %}
+</ul>
+
+<div class="pagination">
+    <ul>
+        {% if paginator.has_previous %}
+        <li><a href="?page={{ paginator.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        {% for pg in paginator.page_range %}
+        {% if paginator.number == pg %}
+        <li class="active"><a href="?page={{ pg }}">{{ pg }}</a></li>
+        {% else %}
+        <li><a href="?page={{ pg }}">{{ pg }}</a></li>
+        {% endif %}
+        {% endfor %}
+        {% if paginator.has_next %}
+        <li><a href="?page={{ paginator.next_page_number }}">Next</a></li>
+        {% endif %}
+    </ul>
+</div>
+
+<a href="{% url customer_home %}" class="btn btn-primary">{% trans "Go Back to Dashboard" %}</a>
+
+{% endblock %}
+

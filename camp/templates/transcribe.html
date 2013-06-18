@@ -1,0 +1,122 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Welcome" %}{% endblock %}
+
+{% block body_class %}worker transcribe{% endblock %}
+
+{% block extra_script %}
+    <script src="{{STATIC_URL}}js/assets/js/jquery-1.9.0.js"></script>
+    <script src="{{STATIC_URL}}js/assets/js/jquery-autosave/src/jquery.autosave.js"></script>
+    <script src="{{STATIC_URL}}js/assets/js/jquery-cookie/jquery.cookie.js"></script>
+    <script type="text/javascript">        
+        $(document).ready(function(){
+
+            $("#id_transcribtion").keypress(function(event) {
+                if (event.which == 32) {
+                    $.ajax({
+                        type: "POST",
+                        data: {transcribtion: this.value}
+                    }).done(function(){
+                        console.log('Auto Saved!');
+                    })        
+                }
+            }); 
+
+            var csrftoken = $.cookie('csrftoken');
+
+            function csrfSafeMethod(method) {
+                // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+            $.ajaxSetup({
+                crossDomain: false, // obviates need for sameOrigin test
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type)) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            function fadeMessage(){}  
+
+            function textareaSave() {            
+                $("#id_transcribtion").autosave({
+                    //url: "transcribe",
+                    method: "post",
+                    grouped: false,
+                    success: function(data) {
+                        $("#message").html("Data updated successfully").show();
+                        setTimeout(fadeMessage(), 1500);
+
+                    },
+                    send: function() {
+                        $("#message").html("Sending data....");
+                        console.log('send data')
+                    },
+                    error: function(xmlReq, text, errorThrown) {
+                        // Handler if the ajax request fails, defaults to console.log-ing the ajax request scope
+                        console.log(text);
+                    },
+                    dataType: "html"
+                });
+            }
+
+            function fadeMessage(){
+                $('#message').fadeOut('slow');
+            }     
+
+        });  
+    </script>
+
+    <script>
+        function goBack() {
+            window.history.back()
+        }
+    </script>
+
+{% endblock %}s
+
+
+
+{% block body %}
+    <div class="row" style="margin-top:30px;">
+        <div class="span8">
+            <p>
+            <h4>Instructions: Play the given video file and transcribe everything you hear. Refer to the current Style Guide for details.
+            </h4>
+            </p>    
+        </div> 
+
+        <!-- Video  -->    
+        <div class="span8">
+            {% include "player.html" %}
+        </div>   
+
+        <p id="message"></p>    
+
+
+        
+        <div class="span4">
+            <form method="POST" action="{% url transcribe video.id %}" autocapitalize="off" class="form-horizontal"{% if form.is_multipart %} enctype="multipart/form-data"{% endif %}>
+                {% csrf_token %}
+                {{ form }}
+                {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+
+
+                
+                
+                <div class="form-actions">                    
+                    <button type="submit" class="btn btn-primary">{% trans "Submit Task" %}</button>
+                </div>
+
+            </form>      
+              
+        </div>
+    
+    </div>   
+
+{% endblock %}

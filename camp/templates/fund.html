@@ -1,0 +1,55 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Welcome" %}{% endblock %}
+
+{% block extra_script %}
+    <script src="{{STATIC_URL}}js/assets/js/jquery-1.9.0.js"></script>
+    <script src="{{STATIC_URL}}js/assets/js/jquery.validate.js"></script>
+    <script type="text/javascript">        
+        $(document).ready(function(){
+            
+            $('#topup-form').validate({
+                rules: {
+                    fund: {
+                        number: true,
+                        required: true,
+                        min: 10,
+                        max: 1000        
+                    }
+                },
+                success: function() {
+                    $('#id_amount').val($('#id_fund').val());
+                }        
+            });
+
+        });  
+    </script>
+{% endblock %}
+
+
+{% block body %}
+    <div class="row" style="margin-top:30px;">
+        <h1>TopUp!</h1>
+
+        <div class="span3">
+            <form id="topup-form" action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
+                {% comemnt %}
+                {% csrf_token %}
+                {% endcomemnt %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary" value="Submit">{% trans "TopUp" %}</button>
+                <a href="{% url customer_home %}" class="btn btn-primary">{% trans "Go Back to Dashboard" %}</a>
+
+                {% comment %}
+                <p>
+                    <img src="https://www.paypal.com/en_US/i/bnr/horizontal_solution_PPeCheck.gif" border="0">
+                </p>
+                {% endcomment %}
+            </form>    
+        </div>
+    
+    </div>
+{% endblock %}       
+

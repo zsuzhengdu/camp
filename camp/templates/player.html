@@ -1,0 +1,23 @@
+{% if video.videourl %}
+
+	<object width="640" height="360">
+	 <param name="movie" value="https://www.youtube.com/v/M7lc1UVf-VE?version=3"></param>
+	  <param name="allowFullScreen" value="true"></param>
+	  <param name="allowScriptAccess" value="always"></param>
+	  <embed src={{ video.videourl }} type="application/x-shockwave-flash" allowfullscreen="true" allowScriptAccess="always" width="640" height="360"></embed>
+	</object>
+
+{% else %}
+
+	<script type="text/javascript" src="{{STATIC_URL}}js/flowplayer/flowplayer-3.2.12.min.js"></script>    
+	                
+	<a  href={{ video.videopath }}
+		style="display:block;width:640px;height:360px;"
+		id="player">
+	</a>
+
+	<script language="JavaScript">
+		$f("player", "{{STATIC_URL}}js/flowplayer/flowplayer-3.2.16.swf", {});
+	</script>
+
+{% endif %}

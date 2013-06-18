@@ -1,0 +1,40 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Welcome" %}{% endblock %}
+
+{% block body_class %}home{% endblock %}
+
+{% block body %}
+    
+    <div class="row">
+        <div class="span6">
+
+            {% if video_in_completed %}
+              <h1>Completed Videos</h1>
+              {% for video in video_in_completed %}
+                <li>{{ video.name }}</li>
+              {% endfor %}
+            {% else %}
+              <h1> Sorry, no completed video yet! </h1>
+            {% endif %}
+          
+        </div>
+        
+        <div class="span6">
+          
+            {% if video_in_process %}
+              <h1>Video in Captioning Process</h1>
+              {% for video in video_in_process %}
+                <li>{{ video.videoname }}</li>
+              {% endfor %}
+            {% else %}
+              <h1> Sorry, there is not any video in captioning process! </h1>
+            {% endif %}
+        </div>
+
+    </div>  
+
+{% endblock %}    
+    

@@ -1,0 +1,15 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Welcome" %}{% endblock %}
+
+{% block body_class %}tos{% endblock %}
+
+<!--
+	Payment Test html
+-->
+
+{% block body %}
+	{{ form.sandbox }}
+{% endblock %}

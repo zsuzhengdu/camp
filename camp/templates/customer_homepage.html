@@ -1,0 +1,52 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Welcome" %}{% endblock %}
+
+{% block body_class %}home{% endblock %}
+
+{% block body %}
+    <h1>Customer Dash Board</h1>
+
+    Hello, {{ customer }}
+
+        <div class="row">
+      	<div class="span3">
+        		<h1>I want to:</h1>
+        		<a class="btn btn-primary btn-block btn-large" href="{% url add_video %}">Add a new video</a>
+            <a class="btn btn-primary btn-block btn-large" href="{% url fund %}">Fund my account</a>
+      	</div>
+      	<div class="span3 offset1">
+        		<h1>My Stats:</h1>
+        		<table class="table table-striped">
+        				<tr>
+          					<td>Metric</td>
+          					<td>Quantity</td>
+        				</tr>
+        				<tr>
+          					<td>Video completed</td>
+          					<td><a href="{% url video_list %}">{{ customer.videos.count }}</a></td>
+        				</tr>
+        				<tr>
+          					<td>Video in process</td>
+          					<td><a href="{% url video_list %}">{{ customer.videos.count }}</a></td>
+        				</tr>
+                {% comment %}
+        				<tr>
+          					<td>Total costs</td>
+          					<td><a>***</a></td>
+        				</tr>
+                {% endcomment %}
+        				<tr>
+          					<td>My account balance</td>
+          					<td>{{ customer.fund }}</td>
+        				</tr>
+      			</table>
+          </div>
+          
+      </div>
+
+    
+{% endblock %}    
+    
