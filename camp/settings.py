@@ -15,10 +15,13 @@ AUTH_PROFILE_MODULE = 'account.Account'
 
 MANAGERS = ADMINS
 
+db_name = 'dev.db'
+db_path = PROJECT_ROOT + '/' + db_name
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "dev.db",
+        "NAME": db_path,
     }
 }
 
@@ -220,23 +223,19 @@ WORKER_EMIAL_CONFIRMATION_REDIRECT_URL = 'worker_home'
 
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
-DEFAULT_FROM_EMAIL = "zsuzhengdu@gmail.com"
+DEFAULT_FROM_EMAIL = "info@hivedirect.com"
+
+EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
+DEFAULT_FROM_EMAIL = 'James Makienko <info@hivedirect.com>'
+EMAIL_HOST = 'email-smtp.us-east-1.amazonaws.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'AKIAJB7SMH62R45HZ57Q'
+EMAIL_HOST_PASSWORD = "An1wAbNYgl5hUIL+HcVNnZv4iQUmpE0SCUGKn3F3tE8Q"    
+EMAIL_USE_TLS = True
 
 AUTHENTICATION_BACKENDS = [
     "account.auth_backends.UsernameAuthenticationBackend",
 ]
-
-
-# Amazon AWS Settings
-
-# Amazon SES
-"""
-EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
-EMAIL_HOST_USER = "AKIAIPYYZMFDLKYEREYA"
-EMAIL_HOST_PASSWORD = "AqVA7UeKKnO8C7304Ii4B8ZncKfA02Dvo/ETOoRujKL3"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-"""
 
 # Amazon S3 Setup
 BUCKET_NAME = 'campcode'
