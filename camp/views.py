@@ -102,6 +102,18 @@ class LoginView(account.views.LoginView):
         kwargs.setdefault("redirect_field_name", self.get_redirect_field_name())
         return default_redirect(self.request, fallback_url, **kwargs)
 
+class ConfirmEmailView(account.views.ConfirmEmailView):
+
+    def get_redirect_url(self):
+        if self.request.user.is_authenticated():
+            customer = Customer.objects.filter(account = self.request.user.get_profile())
+            if customer:
+                return settings.CUSTOMER_EMIAL_CONFIRMATION_REDIRECT_URL
+            else:   # if it is worker
+                return settings.WORKER_EMIAL_CONFIRMATION_REDIRECT_URL 
+        else:
+            return settings.ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL
+
 
 # Dashboard View for Customer
 class CustomerHomeView(View):
