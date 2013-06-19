@@ -1,0 +1,91 @@
+<html>
+  <head>
+  <title>jQuery.autosave Examples</title>
+
+  <link type="text/css" rel="stylesheet" href="styles.css" />
+
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.min.js"></script>
+  <script type="text/javascript" src="../src/jquery.autosave.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function($) {
+      $("form").autosave({
+        callbacks: {
+          trigger: ["change", function() {
+            var self = this;
+
+            $("[name=save]").click(function() {
+              self.save();
+            });
+          }],
+          save: {
+            method: "ajax",
+            options: {
+              success: function() {
+                alert("saved!");
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
+  </head>
+  <body>
+    <h1>jQuery.autosave Examples</h1>
+
+    <h2>The Forms</h2>
+    <form name="example1" id="example1">
+      <ol class="example">
+        <li>
+          <h4>Text</h4>
+          <input name="text" type="text" value="" />
+        </li>
+        <li>
+          <h4>Textarea</h4>
+          <textarea name="textarea"></textarea>
+        </li>
+        <li>
+          <h4>Radio Group</h4>
+          <span class="group">
+            <label class="radio"><input name="radio" type="radio" value="1" />1</label>
+            <label class="radio"><input name="radio" type="radio" value="2" />2</label>
+            <label class="radio"><input name="radio" type="radio" value="3" />3</label>
+          </span>
+        </li>
+        <li>
+          <h4>Checkbox Group</h4>
+          <span class="group">
+            <label class="checkbox"><input name="checkbox" type="checkbox" value="1" />1</label>
+            <label class="checkbox"><input name="checkbox" type="checkbox" value="2" />2</label>
+            <label class="checkbox"><input name="checkbox" type="checkbox" value="3" />3</label>
+          </span>
+        </li>
+        <li>
+          <h4>Select List</h4>
+          <select name="select">
+            <option value=""></option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </li>
+          <li>
+            <h4>Multiple Select List</h4>
+            <select name="multi-select" multiple="multiple">
+              <option value=""></option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </li>
+      </ol>
+    </form>
+
+    <form name="example2" id="example2">
+      <input name="text2" type="text" value="" />
+    </form>
+
+    <button type="button" name="save">Save</button>
+  </body>
+</html>
