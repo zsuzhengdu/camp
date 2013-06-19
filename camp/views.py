@@ -106,11 +106,17 @@ class LoginView(account.views.LoginView):
 # Dashboard View for Customer
 class CustomerHomeView(View):
 
+
     def get(self, *args, **kwargs):
-        #print self.request.user
+        print '----> Customer homepage'    
+        print self.request.user
+        
         customer = Customer.objects.get(account = self.request.user.get_profile())
-        customer.fund = '0'
-        return render_to_response('customer_homepage.html', {"customer": customer, "request": self.request, "SITE_NAME": 'HiveScribe'})
+        # customer.fund = '0'
+        video_done = sum(video for video in customer.videos.all() if video.videostate == 'done')
+        video_wip = customer.videos.count() - video_done
+        
+        return render_to_response('customer_homepage.html', {"customer": customer, 'video_done': video_done, "video_wip": video_wip, "request": self.request, "SITE_NAME": 'HiveScribe'})
         
 
 #Boto S3 API libraries to talk to the S3
@@ -330,6 +336,7 @@ class WorkerVideoView(View):
         return render_to_response('worker_video.html', {"worker": worker, "request": self.request, "SITE_NAME": 'HiveScribe'})
 
 class FundView(FormView):
+    print '----> FundView'
 
     template_name = 'fund.html'
     form_class = FundForm

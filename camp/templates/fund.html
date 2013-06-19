@@ -35,9 +35,6 @@
 
         <div class="span3">
             <form id="topup-form" action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
-                {% comemnt %}
-                {% csrf_token %}
-                {% endcomemnt %}
                 {{ form.as_p }}
                 <button type="submit" class="btn btn-primary" value="Submit">{% trans "TopUp" %}</button>
                 <a href="{% url customer_home %}" class="btn btn-primary">{% trans "Go Back to Dashboard" %}</a>

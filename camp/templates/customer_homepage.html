@@ -24,13 +24,17 @@
           					<td>Metric</td>
           					<td>Quantity</td>
         				</tr>
+                <tr>
+                    <td>Video uploaded</td>
+                    <td><a href="{% url video_list %}">{{ customer.videos.count }}</a></td>
+                </tr>
         				<tr>
           					<td>Video completed</td>
-          					<td><a href="{% url video_list %}">{{ customer.videos.count }}</a></td>
+          					<td><a href="{% url video_list %}">{{ video_done }}</a></td>
         				</tr>
         				<tr>
-          					<td>Video in process</td>
-          					<td><a href="{% url video_list %}">{{ customer.videos.count }}</a></td>
+          					<td>Video uploaed or in process</td>
+          					<td><a href="{% url video_list %}">{{ video_wip }}</a></td>
         				</tr>
                 {% comment %}
         				<tr>

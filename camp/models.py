@@ -61,7 +61,7 @@ class Video(models.Model):
 class Customer(models.Model):
 	account = models.OneToOneField(Account, verbose_name=("customer"))
 	videos = models.ManyToManyField(Video, blank=True)		# videos uploaded by customer
-	fund = models.CharField(max_length=10)								# fund availdable (in String), right now customer pay by usage
+	fund = models.DecimalField(max_digits=5, decimal_places=2, default =0)								# fund availdable (in String), right now customer pay by usage
 	
 	def __unicode__(self):
 		return self.account.user.username
@@ -85,17 +85,11 @@ class Worker(models.Model):
 from paypal.standard.ipn.signals import payment_was_successful
 
 def show_me_the_money(sender, **kwargs):
+	print	"----> show me the money" 
+	print	'*' * 20
+	print 	kwargs
+	print 	'*' * 20
 
-    ipn_obj = sender
-    
-    print '----> ipn_obj'
-    print ipn_obj
-
-    print '----> show me the money'
-    print kwargs
-    # Undertake some action depending upon `ipn_obj`.
-    # if ipn_obj.custom == "Upgrade all users!":
-    #    Users.objects.update(paid=True)        
 
 payment_was_successful.connect(show_me_the_money)
 

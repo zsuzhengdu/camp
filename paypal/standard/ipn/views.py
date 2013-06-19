@@ -5,6 +5,10 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from paypal.standard.ipn.forms import PayPalIPNForm
 from paypal.standard.ipn.models import PayPalIPN
+from account.models import Account
+from account.utils import default_redirect, user_display
+from camp.models import Customer, Worker, Video
+from decimal import *
  
 
 from django.shortcuts import redirect, get_object_or_404, render_to_response
@@ -32,6 +36,17 @@ def ipn(request, item_check_callable=None):
     
     # Clean up the data as PayPal sends some weird values such as "N/A"
     data = request.POST.copy()
+
+    
+    print 'data collected'
+    print '*' * 20
+    print data
+    print '*' * 20
+    print 'ammount topup by user'
+    print data['mc_gross']
+    
+
+
     date_fields = ('time_created', 'payment_date', 'next_payment_date',
                    'subscr_date', 'subscr_effective')
     for date_field in date_fields:
@@ -39,6 +54,14 @@ def ipn(request, item_check_callable=None):
             del data[date_field]
 
     form = PayPalIPNForm(data)
+
+    """
+    print 'paypal ipn form'
+    print '*' * 20
+    print form
+    print '*' * 20
+    """
+
     if form.is_valid():
         try:
             #When commit = False, object is returned without saving to DB.
@@ -53,6 +76,11 @@ def ipn(request, item_check_callable=None):
     
     #Set query params and sender's IP address
     ipn_obj.initialize(request)
+    print 'initialize the ipn process'
+
+    print '*' * 10
+    print 'check flag'
+    print flag
 
     if flag is not None:
         #We save errors in the flag field
@@ -61,9 +89,24 @@ def ipn(request, item_check_callable=None):
         # Secrets should only be used over SSL.
         if request.is_secure() and 'secret' in request.GET:
             ipn_obj.verify_secret(form, request.GET['secret'])
+
         else:
             ipn_obj.verify(item_check_callable)
-
+            print 'update user account'
+            print request.user
+            customer = Customer.objects.get(account = request.user.get_profile())
+            # customer = Customer.objects.filter(account = request.user.get_profile())
+            print 'customer'
+            print customer
+            print customer.fund
+            print customer.videos
+            customer.fund = customer.fund + Decimal(data['mc_gross'])
+            customer.save()
     ipn_obj.save()
-    #return HttpResponse("OKAY")
+
+    print '----> Save IPN object'
+    print ipn_obj
+
+    # return HttpResponse("OKAY")
     return redirect("customer_home")
+

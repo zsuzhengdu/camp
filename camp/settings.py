@@ -156,7 +156,7 @@ PAYPAL_PDT_TOKEN = 'Ap9OVxjK6.a1ze5JnOKs03acqudgAo5htsDtrDMtBkZPBjq9tvBFPGxV' #'
 # Reset followin basing on the source of request in views.py
 PAYPAL_RETURN_URL = 'http://127.0.0.1:8000/notify_url/'
 PAYPAL_NOTIFY_URL = 'http://127.0.0.1:8000/notify_url/'
-PAYPAL_CANCEL_URL = 'http://127.0.0.1:8000'
+PAYPAL_CANCEL_URL = 'http://127.0.0.1:8000/customer_homepage/'
 
 
 # sandbox
