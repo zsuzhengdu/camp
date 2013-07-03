@@ -23,11 +23,12 @@ from account.utils import default_redirect, user_display
 from camp.models import Customer, Worker, Video
 
 
-
 class CustomerSignupView(account.views.SignupView):
 
+
+    THEME_ACCOUNT_CONTACT_EMAIL = "zsuzhengdu@gmail.com"
     template_name = "customer_signup.html"
-    template_name_ajax = "customer_signup.html"
+   #  template_name_ajax = "customer_signup.html"
 
     def get(self, *args, **kwargs):
         if self.request.user.is_authenticated():
@@ -36,9 +37,15 @@ class CustomerSignupView(account.views.SignupView):
             return self.closed()
         return super(CustomerSignupView, self).get(*args, **kwargs)
 
+    def post(self, *args, **kwargs):
+        if not self.is_open():
+            return self.closed()
+        return super(CustomerSignupView, self).post(*args, **kwargs)
+    
     def get_success_url(self, fallback_url=None, **kwargs):
         if fallback_url is None:
-            fallback_url = settings.CUSTOMER_ACCOUNT_SIGNUP_REDIRECT_URL
+            #fallback_url = settings.CUSTOMER_ACCOUNT_SIGNUP_REDIRECT_URL
+            fallback_url = settings.ACCOUNT_SIGNUP_REDIRECT_URL
         kwargs.setdefault("redirect_field_name", self.get_redirect_field_name())
         return default_redirect(self.request, fallback_url, **kwargs)
 
@@ -56,6 +63,22 @@ class CustomerSignupView(account.views.SignupView):
         customer.account = profile
         customer.save()
 
+    def email_confirmation_required_response(self):
+        if self.request.is_ajax():
+            template_name = self.template_name_email_confirmation_sent_ajax
+        else:
+            template_name = self.template_name_email_confirmation_sent
+        response_kwargs = {
+            "request": self.request,
+            "template": template_name,
+            "context": {
+                "email": self.created_user.email,
+                "success_url": self.get_success_url(),
+                "THEME_ACCOUNT_CONTACT_EMAIL": "info@HiveScribe.com"
+            }
+        }
+        return self.response_class(**response_kwargs)
+
 
 class WorkerSignupView(account.views.SignupView):
       
@@ -71,7 +94,7 @@ class WorkerSignupView(account.views.SignupView):
 
     def get_success_url(self, fallback_url=None, **kwargs):
         if fallback_url is None:
-            fallback_url = settings.WORKER_ACCOUNT_SIGNUP_REDIRECT_URL
+            fallback_url = settings.ACCOUNT_SIGNUP_REDIRECT_URL
         kwargs.setdefault("redirect_field_name", self.get_redirect_field_name())
         return default_redirect(self.request, fallback_url, **kwargs)
 
@@ -86,6 +109,22 @@ class WorkerSignupView(account.views.SignupView):
         worker = Worker()
         worker.account = profile
         worker.save()
+
+    def email_confirmation_required_response(self):
+        if self.request.is_ajax():
+            template_name = self.template_name_email_confirmation_sent_ajax
+        else:
+            template_name = self.template_name_email_confirmation_sent
+        response_kwargs = {
+            "request": self.request,
+            "template": template_name,
+            "context": {
+                "email": self.created_user.email,
+                "success_url": self.get_success_url(),
+                "THEME_ACCOUNT_CONTACT_EMAIL": "info@HiveScribe.com"
+            }
+        }
+        return self.response_class(**response_kwargs)
 
 
 # Unified Login View
@@ -102,6 +141,8 @@ class LoginView(account.views.LoginView):
         kwargs.setdefault("redirect_field_name", self.get_redirect_field_name())
         return default_redirect(self.request, fallback_url, **kwargs)
 
+
+
 class ConfirmEmailView(account.views.ConfirmEmailView):
 
     def get_redirect_url(self):
@@ -114,6 +155,11 @@ class ConfirmEmailView(account.views.ConfirmEmailView):
         else:
             return settings.ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL
 
+from django.contrib import auth
+from django.contrib.auth import authenticate, login, logout
+def LogoutView(request):
+    auth.logout(request)
+    return redirect('home')
 
 # Dashboard View for Customer
 class CustomerHomeView(View):
@@ -125,7 +171,11 @@ class CustomerHomeView(View):
         
         customer = Customer.objects.get(account = self.request.user.get_profile())
         # customer.fund = '0'
-        video_done = sum(video for video in customer.videos.all() if video.videostate == 'done')
+        video_done = 0
+        for video in customer.videos.all():
+            if video.videostate == 'done':
+                video_done = video_done + 1
+                
         video_wip = customer.videos.count() - video_done
         
         return render_to_response('customer_homepage.html', {"customer": customer, 'video_done': video_done, "video_wip": video_wip, "request": self.request, "SITE_NAME": 'HiveScribe'})
@@ -348,7 +398,7 @@ class WorkerVideoView(View):
         return render_to_response('worker_video.html', {"worker": worker, "request": self.request, "SITE_NAME": 'HiveScribe'})
 
 class FundView(FormView):
-    print '----> FundView'
+    #print '----> FundView'
 
     template_name = 'fund.html'
     form_class = FundForm

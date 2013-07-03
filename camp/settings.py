@@ -70,7 +70,7 @@ STATIC_ROOT = os.path.join(PACKAGE_ROOT, "site_media", "static")
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = "/static/"
+STATIC_URL = "/site_media/static/"
 
 # Additional locations of static files
 STATICFILES_DIRS = [
@@ -204,12 +204,16 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 ACCOUNT_OPEN_SIGNUP = True
 ACCOUNT_USE_OPENID = False
-ACCOUNT_REQUIRED_EMAIL = False
+ACCOUNT_REQUIRED_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = False
-ACCOUNT_EMAIL_AUTHENTICATION = False
+ACCOUNT_EMAIL_AUTHENTICATION = True
+ACCOUNT_EMAIL_CONFIRMATION_REQUIRED = True
+
+THEME_ACCOUNT_CONTACT_EMAIL = "zsuzhengdu@gmail.com"
 
 ACCOUNT_LOGIN_REDIRECT_URL = "home"
 ACCOUNT_LOGOUT_REDIRECT_URL = "home"
+ACCOUNT_SIGNUP_REDIRECT_URL = "/"
 
 # Default Customer Redirect Page
 CUSTOMER_ACCOUNT_SIGNUP_REDIRECT_URL = "customer_home"
@@ -223,10 +227,9 @@ WORKER_EMIAL_CONFIRMATION_REDIRECT_URL = 'worker_home'
 
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
-DEFAULT_FROM_EMAIL = "info@hivedirect.com"
-
 EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
-DEFAULT_FROM_EMAIL = 'James Makienko <info@hivedirect.com>'
+# DEFAULT_FROM_EMAIL = 'James Makienko <info@hivedirect.com>'
+DEFAULT_FROM_EMAIL = "zsuzhengdu@gmail.com"
 EMAIL_HOST = 'email-smtp.us-east-1.amazonaws.com'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'AKIAJB7SMH62R45HZ57Q'

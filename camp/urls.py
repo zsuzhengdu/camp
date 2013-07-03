@@ -14,7 +14,7 @@ import camp.views
 
 urlpatterns = patterns("",
     url(r"^$", direct_to_template, {"template": "homepage.html"}, name="home"),
-    (r'^(?P<pk>\d)$', camp.views.HybridDetailView.as_view(model=Person)),
+    # (r'^(?P<pk>\d)$', camp.views.HybridDetailView.as_view(model=Person)),
 
     url(r"^tos/$", direct_to_template, {"template": "tos.html"}, name="tos"),
     url(r"^contact/$", direct_to_template, {"template": "contact.html"}, name="contact"),
@@ -31,8 +31,10 @@ urlpatterns = patterns("",
 
     # Unified Login
     url(r"^account/login/$", camp.views.LoginView.as_view(), name="account_login"),
+    url(r"^account/logout/$", camp.views.LogoutView, name="account_logout"),
     url(r"^account/", include("account.urls")),    
 
+    
     url(r"^admin/", include(admin.site.urls)),
 
     # User Actions
