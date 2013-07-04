@@ -23,6 +23,7 @@ class Video(models.Model):
 	videopath = models.FileField(upload_to="videos", max_length=100)
 	videosource = models.CharField(max_length=256)
 	videourl = models.CharField(max_length=256)
+	videolength = models.IntegerField()
 	upload_date = models.DateTimeField(auto_now_add=True)					# Upload date
 	language = models.CharField(max_length=128)
 	note = models.TextField()
@@ -79,7 +80,7 @@ class Worker(models.Model):
 	state = models.CharField(max_length=10)					# Current state of video  "idle --> busy --> idle"
 
 	def __unicode__(self):
-		return self.account.user
+		return self.account.user.username
 
 
 from paypal.standard.ipn.signals import payment_was_successful

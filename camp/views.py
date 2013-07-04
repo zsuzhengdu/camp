@@ -21,7 +21,9 @@ import urlparse
 from account.models import Account
 from account.utils import default_redirect, user_display
 from camp.models import Customer, Worker, Video
+from datetime import timedelta
 
+RATE_PER_MIN = 1.50
 
 class CustomerSignupView(account.views.SignupView):
 
@@ -126,6 +128,13 @@ class WorkerSignupView(account.views.SignupView):
         }
         return self.response_class(**response_kwargs)
 
+from django.contrib import auth
+from django.contrib.auth import authenticate, login, logout
+
+def LogoutView(request):
+    auth.logout(request)
+    return redirect('home')
+
 
 # Unified Login View
 class LoginView(account.views.LoginView):
@@ -155,31 +164,37 @@ class ConfirmEmailView(account.views.ConfirmEmailView):
         else:
             return settings.ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL
 
-from django.contrib import auth
-from django.contrib.auth import authenticate, login, logout
-def LogoutView(request):
-    auth.logout(request)
-    return redirect('home')
 
 # Dashboard View for Customer
 class CustomerHomeView(View):
 
 
     def get(self, *args, **kwargs):
-        print '----> Customer homepage'    
-        print self.request.user
-        
+
         customer = Customer.objects.get(account = self.request.user.get_profile())
-        # customer.fund = '0'
-        video_done = 0
-        for video in customer.videos.all():
-            if video.videostate == 'done':
-                video_done = video_done + 1
-                
+
+        video_done = sum(1 for video in customer.videos.all() if video.videostate == 'done') 
+
         video_wip = customer.videos.count() - video_done
         
         return render_to_response('customer_homepage.html', {"customer": customer, 'video_done': video_done, "video_wip": video_wip, "request": self.request, "SITE_NAME": 'HiveScribe'})
         
+
+class WorkerHomeView(View):
+
+    def get(self, *args, **kwargs):
+        
+        worker = Worker.objects.get(account = self.request.user.get_profile())
+
+        total_min = sum(video.videolength for video in worker.videos.all())
+
+        
+        total_earned = '$' + "%.2f" % (total_min * RATE_PER_MIN / 60)
+
+        ctx = {"worker": worker, "request": self.request, "SITE_NAME": 'HiveScribe', 'total_min': timedelta(seconds = total_min), 'video_completed': len(worker.videos.all()), 'total_earned': total_earned}
+
+        return render_to_response('worker_homepage.html', ctx)
+
 
 #Boto S3 API libraries to talk to the S3
 import boto
@@ -246,6 +261,12 @@ def s3_upload(request, path):
     os.remove(path)
 
 
+import subprocess
+from subprocess import Popen, PIPE, STDOUT
+from datetime import timedelta
+from urllib2 import urlopen
+from xml.dom.minidom import parseString
+
 class AddVideoView(FormView):
 
     template_name = 'add_video.html'
@@ -262,6 +283,9 @@ class AddVideoView(FormView):
             path = settings.MEDIA_ROOT + '/' + str(video.videopath)
             print path
 
+            video.videolength = self.get_length(path)   # videolength in seconds
+
+
             video.videopath = "http://s3.amazonaws.com/campcode" + path
             video.save()
             
@@ -272,29 +296,69 @@ class AddVideoView(FormView):
             p = multiprocessing.Process(target=s3_upload, args=(self.request, path))
             p.start()
 
-
-
         #self.after_upload()
         return super(AddVideoView, self).form_valid(form)
+
+    #extract hours, minutes, seconds and milliseconds from string
+
+    def get_length_yt(self, vid):
+        url = 'https://gdata.youtube.com/feeds/api/videos/{0}?v=2'.format(vid)
+        # return int(parseString(urlopen(url).read()).getElementsByTagName('yt:duration')[0].attributes['second'])
+
+        s = urlopen(url).read()
+        d = parseString(s)
+        e = d.getElementsByTagName('yt:duration')[0]
+        a = e.attributes['seconds']
+        v = int(a.value)
+        return v
+
+    def seclength(self, timestring): 
+        hh = int(timestring[0:2])
+        mm = int(timestring[3:5])
+        ss = int(timestring[6:8])
+        ms = int(timestring[9:11])
+        return int(3600*hh + 60*mm + ss + int(round(float(ms)/100))) #casting rules!!!
+
+    def get_length(self, vid_path):
+        print "--->get_length()"
+        verbose = True
+        result = Popen(["ffprobe", vid_path], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        ffprobe_out = [x for x in result.stdout.readlines() if "Duration" in x]
+        return self.seclength((ffprobe_out[0])[12:23])
 
     def create_video(self, form, **kwargs):
         print 'Data grabed from front end'
         video = Video(
             videoname = form.cleaned_data.get("videoname"),
             videopath = form.cleaned_data.get("path"),
-            videourl = self.parse_url(form.cleaned_data.get("url")),           
+            videourl = self.parse_url(form.cleaned_data.get("url")), 
+            videolength = 0,  # set default video length        
             # Update state of video
             videostate = "uploaded"    
         )
+
+        if video.videourl:
+            video.videolength = self.get_length_yt(self.get_vid_yt(form.cleaned_data.get("url")))
+
         video.save()
         return video
    
     def parse_url(self, url):
+        print '----> parse_url'
         if not url:
             return url
         url_data = urlparse.urlparse(url)
         query = urlparse.parse_qs(url_data.query)
+        print query
         return "https://www.youtube.com/v/" + query["v"][0] + "?version=3"
+
+    def get_vid_yt(self, url):
+        if not url:
+            return url
+        url_data = urlparse.urlparse(url)
+        query = urlparse.parse_qs(url_data.query)
+        return query["v"][0]
+
      
     def update_videoowner(self, video):
         print '----> videoowner_update'
@@ -306,29 +370,6 @@ class AddVideoView(FormView):
         print 'onwer of video'
         print customer
         print '*' * 10  
-
-    """    
-    def s3_upload(self, path):
-
-        bucket_name = settings.BUCKET_NAME
-        conn = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
-        bucket = conn.get_bucket(bucket_name)  
-        k = Key(bucket)
-        k.key = path     # set the key value using path + filename you would store your file (e.g. video_path + video_file_name)
-                         # key is the path you store the file on amazon s3  
-
-        fp = open(path)  # exception test
-        # set conttents from local drive to S3, which gives bad user experience in sysc mode. Try to write in async mode. (Subprocess or Celery)
-        k.set_contents_from_file(fp)        
-        fp.close()
-             
-        # we need to make it public so it can be accessed publicly
-        # using a URL like http://s3.amazonaws.com/bucket_name/key
-        k.make_public()
-
-        os.remove(path)
-    """
-
                 
     # Broadcast video transcribing request to qualified transcriber (worker)    
     # Note: Check the existence of qualified worker

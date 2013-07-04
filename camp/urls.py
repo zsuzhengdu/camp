@@ -23,8 +23,8 @@ urlpatterns = patterns("",
 	# Multipe types of user redirect
 	#url(r"^customer_homepage/$", direct_to_template, {"template": "customer_homepage.html"}, name="customer_home"),
 	url(r"^customer_homepage/$", camp.views.CustomerHomeView.as_view(), name="customer_home"),
-    url(r"^worker_homepage/$", direct_to_template, {"template": "worker_homepage.html"}, name="worker_home"),
-	    
+    # url(r"^worker_homepage/$", direct_to_template, {"template": "worker_homepage.html"}, name="worker_home"),
+	url(r"^worker_homepage/$", camp.views.WorkerHomeView.as_view(), name="worker_home"),
     # Mutiple types of user signup
     url(r"^account/signup/customer/$", camp.views.CustomerSignupView.as_view(), name="customer_account_signup"),
     url(r"^account/signup/worker/$", camp.views.WorkerSignupView.as_view(), name="worker_account_signup"),
