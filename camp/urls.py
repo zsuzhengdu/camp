@@ -32,6 +32,7 @@ urlpatterns = patterns("",
     # Unified Login
     url(r"^account/login/$", camp.views.LoginView.as_view(), name="account_login"),
     url(r"^account/logout/$", camp.views.LogoutView, name="account_logout"),
+    url(r"^account/confirm_email/(?P<key>\w+)/$", camp.views.ConfirmEmailView.as_view(), name="account_confirm_email"),
     url(r"^account/", include("account.urls")),    
 
     
