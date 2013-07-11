@@ -12,8 +12,13 @@
 
 
 {% block body %}
+
+<div class="lead" style="margin-top:10px; font-size: 20px;">
+    Get your audio and video files transcribed!
+</div>
+
     <div class="row" style="margin-top:10px;">
-                
+              
         <div class="span-8">
             {% include "homepage_video.html" %}
 
@@ -21,12 +26,23 @@
         
         {% if not request.user.is_authenticated and ACCOUNT_OPEN_SIGNUP %}        
             <div class="span3 ">                                   
-                <a href="{% url customer_account_signup %}" style="margin-top:120px; margin-right:0px" class="btn btn-primary btn-large btn-block">Sign up (Customer)</a>             
-                <a href="{% url worker_account_signup %}" style="margin-top:20px; margin-right:0px" class="btn btn-primary btn-large btn-block">Sign up (Worker)</a>       
+                <a href="{% url customer_account_signup %}" style="margin-top:120px; margin-right:0px" class="btn btn-primary btn-large btn-block">I need a transcript!</a>             
+                <a href="{% url worker_account_signup %}" style="margin-top:20px; margin-right:0px" class="btn btn-primary btn-large btn-block">I want to transcribe!</a>       
             </div>
         {% endif %}
     </div>
-    
+
+    <div class="row">
+        <div class="span-8" style="margin-top:20px;">
+		    We enable you to get an exceptional transcript 
+            <ul>
+                <li>Pre-selected experienced transcribers for exceptional quality!</li>
+                <li>Comprehensive pricing, fair to you and to transcriber!</li>
+                <li>24 to 48 hour standard delivery time!</li>
+            </ul>
+        </div>
+    </div> 
+
     <div class="row">
         <div class="span-8" style="margin-top:20px;">
         <a href="{% url learn_more %}" class="lead">Learn more about how HiveScribe works!</a>

@@ -14,12 +14,6 @@
         </li>
     {% else %}
         <li><a href="{% url account_login %}">Log in</a></li>
-        {% comment %}
-        {% if ACCOUNT_OPEN_SIGNUP %}
-            <li class="navbar-text">or</li>
-            <li><a href="{% url customer_account_signup %}">Sign up (Customer)</a></li>            
-            <li><a href="{% url worker_account_signup %}">Sign up (Worker)</a></li>
-        {% endif %}
-        {% endcomment %}
+
     {% endif %}
 </ul>

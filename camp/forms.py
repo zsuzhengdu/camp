@@ -215,7 +215,7 @@ class FundForm(forms.Form):
 	fund = forms.FloatField(
 		max_value=1000,
 		min_value=10,
-		initial=10,
+		initial=15,
 		required=True
 	)
 

@@ -14,7 +14,7 @@ import camp.views
 
 urlpatterns = patterns("",
     url(r"^$", direct_to_template, {"template": "homepage.html"}, name="home"),
-    (r'^(?P<pk>\d)$', camp.views.HybridDetailView.as_view(model=Person)),
+    # (r'^(?P<pk>\d)$', camp.views.HybridDetailView.as_view(model=Person)),
 
     url(r"^tos/$", direct_to_template, {"template": "tos.html"}, name="tos"),
     url(r"^contact/$", direct_to_template, {"template": "contact.html"}, name="contact"),
@@ -23,16 +23,18 @@ urlpatterns = patterns("",
 	# Multipe types of user redirect
 	#url(r"^customer_homepage/$", direct_to_template, {"template": "customer_homepage.html"}, name="customer_home"),
 	url(r"^customer_homepage/$", camp.views.CustomerHomeView.as_view(), name="customer_home"),
-    url(r"^worker_homepage/$", direct_to_template, {"template": "worker_homepage.html"}, name="worker_home"),
-	    
+    # url(r"^worker_homepage/$", direct_to_template, {"template": "worker_homepage.html"}, name="worker_home"),
+	url(r"^worker_homepage/$", camp.views.WorkerHomeView.as_view(), name="worker_home"),
     # Mutiple types of user signup
     url(r"^account/signup/customer/$", camp.views.CustomerSignupView.as_view(), name="customer_account_signup"),
     url(r"^account/signup/worker/$", camp.views.WorkerSignupView.as_view(), name="worker_account_signup"),
 
     # Unified Login
     url(r"^account/login/$", camp.views.LoginView.as_view(), name="account_login"),
+    url(r"^account/logout/$", camp.views.LogoutView, name="account_logout"),
     url(r"^account/", include("account.urls")),    
 
+    
     url(r"^admin/", include(admin.site.urls)),
 
     # User Actions
@@ -83,3 +85,4 @@ urlpatterns = patterns("",
 )
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
