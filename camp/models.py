@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from account.models import Account
+from camp.formatChecker import ContentTypeRestrictedFileField
 
 import settings
 
@@ -16,11 +17,14 @@ class Person(models.Model):
 
 
 
+
 class Video(models.Model):
 	videoname = models.CharField(max_length=100)					# name of video
 	videostate = models.CharField(max_length=10)					# Current state of video "uploaded --> in process ->  
 															#  --> Done.
 	videopath = models.FileField(upload_to="videos", max_length=100)
+	#videopath = ContentTypeRestrictedFileField(content_types=['video/flv', 'video/mp4',],max_upload_size=5242880,blank=True, null=True)
+	
 	videosource = models.CharField(max_length=256)
 	videourl = models.CharField(max_length=256)
 	videolength = models.IntegerField()

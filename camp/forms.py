@@ -1,4 +1,5 @@
 import re
+import os
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import NON_FIELD_ERRORS
@@ -11,9 +12,13 @@ from paypal.standard.widgets import ValueHiddenInput, ReservedValueHiddenInput
 from paypal.standard.conf import (POSTBACK_ENDPOINT, SANDBOX_POSTBACK_ENDPOINT, 
     RECEIVER_EMAIL)
 
+from camp.test import ExtFileField
+
 import account.forms
 from camp.models import Video
 import settings
+
+from django.template.defaultfilters import filesizeformat
 
 alnum_re = re.compile(r'^\w+$')
 youtube_url_re = re.compile(r'(https?://)?(www\.)?youtube\.(com|nl)/watch\?v=([-\w]+)')	
@@ -42,16 +47,32 @@ class VideoForm(forms.Form):
 		choices=VIDEO_SOURCE
 	)
 
+	
 	path = forms.FileField(
 		label = "File Path for Video",
 		required = False
 	)
+
+	def clean_path(self):
+
+		content = self.cleaned_data['path']
+		if not content:
+			return
+		if content.content_type in settings.CONTENT_TYPES:
+			if content._size > settings.MAX_UPLOAD_SIZE:
+				raise forms.ValidationError(_('The uploaded file size is bigger than 50 MB'))
+		else:
+			raise forms.ValidationError(_('Please upload video file, e.g. flv., mov. and mp4'))
+		return content	
+
+	#path = ExtFileField(ext_whitelist=(".flv", ".mov", "mp4"), label="File path for video", required=True)
 
 	url = forms.CharField(
 		label = "YouTube Video url",
 		#validators=[validate_url],
 		required = False
 	)
+
 
 	def clean_url(self):
 		if not self.cleaned_data.get('url'):
