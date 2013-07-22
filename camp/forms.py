@@ -12,8 +12,6 @@ from paypal.standard.widgets import ValueHiddenInput, ReservedValueHiddenInput
 from paypal.standard.conf import (POSTBACK_ENDPOINT, SANDBOX_POSTBACK_ENDPOINT, 
     RECEIVER_EMAIL)
 
-from camp.test import ExtFileField
-
 import account.forms
 from camp.models import Video
 import settings

@@ -22,13 +22,15 @@
 
 {% block body %}
 
-	<div class="row">
-		<div class="span8">
+{% comment %}
+    	<div class="row">
+		<div class="span12">
+
 			Object in template called without AJAX: {{object}}<hr/>
             <input type="button" onclick="send_request();" value="Request this page with AJAX" /><br/>
             <b>Name via AJAX:</b><span id="idName"></span><br/>
             <b>Birthday via AJAX:</b><span id="idBirthday"></span><br/>
 		</div>
 	</div>
-
+{% endcomment %}
 {% endblock %}

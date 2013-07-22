@@ -6,9 +6,18 @@ from django.core.urlresolvers import reverse
 from django.core import serializers
 from django.template import RequestContext
 from django.utils.translation import ugettext_lazy as _
+<<<<<<< HEAD
 
 
 from django.contrib import auth, messages
+=======
+from django.views.generic.base import TemplateResponseMixin, View
+
+from django.contrib import auth, messages
+from django.contrib.auth.models import User
+from django.contrib.sites.models import get_current_site
+from django.contrib.auth.tokens import default_token_generator
+>>>>>>> bf11cba335b9912435806e2dd0252cfd7a470ac3
 from django.contrib.auth.models import User
 from django.contrib.sites.models import get_current_site
 from django.contrib.auth.tokens import default_token_generator
@@ -16,7 +25,11 @@ from django.views.generic.edit import FormView, View
 from django.views.generic import ListView, TemplateView
 
 from account.utils import default_redirect, user_display
+<<<<<<< HEAD
 # from account.models import SignupCode, EmailAddress, EmailConfirmation, Account, AccountDeletion
+=======
+from account.models import SignupCode, EmailAddress, EmailConfirmation, Account, AccountDeletion
+>>>>>>> bf11cba335b9912435806e2dd0252cfd7a470ac3
 
 from camp.forms import *
 import camp.views
@@ -30,9 +43,121 @@ from account.utils import default_redirect, user_display
 from camp.models import Customer, Worker, Video
 from datetime import timedelta
 from decimal import *
+<<<<<<< HEAD
 
 COST_PER_MIN = 5.00
 RATE_PER_MIN = 1.50
+=======
+
+COST_PER_MIN = 5.00
+RATE_PER_MIN = 1.50
+
+"""
+class CustomerSignupView(account.views.SignupView):
+
+
+    THEME_ACCOUNT_CONTACT_EMAIL = "zsuzhengdu@gmail.com"
+    template_name = "customer_signup.html"
+    messages = {
+        "email_confirmation_sent": {
+            "level": messages.INFO,
+            "text": _("Thanks you for siging up! Confirmation email sent to %(email)s.")
+        },
+        "invalid_signup_code": {
+            "level": messages.WARNING,
+            "text": _("The code %(code)s is invalid.")
+        }
+    }
+   #  template_name_ajax = "customer_signup.html"
+
+    def get(self, *args, **kwargs):
+        if self.request.user.is_authenticated():
+            return redirect(default_redirect(self.request, settings.CUSTOMER_ACCOUNT_LOGIN_REDIRECT_URL))
+        if not self.is_open():
+            return self.closed()
+        return super(CustomerSignupView, self).get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        if not self.is_open():
+            return self.closed()
+        return super(CustomerSignupView, self).post(*args, **kwargs)
+
+    def form_valid(self, form):
+        self.created_user = self.create_user(form, commit=False)
+        # prevent User post_save signal from creating an Account instance
+        # we want to handle that ourself.
+        self.created_user._disable_account_creation = True
+        self.created_user.save()
+        email_address = self.create_email_address(form)
+        if settings.ACCOUNT_EMAIL_CONFIRMATION_REQUIRED and not email_address.verified:
+            self.created_user.is_active = False
+            self.created_user.save()
+        self.create_account(form)
+        self.after_signup(form)
+        if settings.ACCOUNT_EMAIL_CONFIRMATION_EMAIL and not email_address.verified:
+            email_address.send_confirmation()
+        if settings.ACCOUNT_EMAIL_CONFIRMATION_REQUIRED and not email_address.verified:
+            return self.email_confirmation_required_response()
+        else:
+            show_message = [
+                settings.ACCOUNT_EMAIL_CONFIRMATION_EMAIL,
+                self.messages.get("email_confirmation_sent"),
+                not email_address.verified
+            ]
+            if all(show_message):
+                messages.add_message(
+                    self.request,
+                    self.messages["email_confirmation_sent"]["level"],
+                    self.messages["email_confirmation_sent"]["text"] % {
+                        "email": form.cleaned_data["email"]
+                    }
+                )
+            self.login_user()
+        
+        print '---- messages ----'
+        
+
+        return redirect(self.get_success_url())
+
+    
+    def get_success_url(self, fallback_url=None, **kwargs):
+        if fallback_url is None:
+            #fallback_url = settings.CUSTOMER_ACCOUNT_SIGNUP_REDIRECT_URL
+            fallback_url = settings.ACCOUNT_SIGNUP_REDIRECT_URL
+        kwargs.setdefault("redirect_field_name", self.get_redirect_field_name())
+        return default_redirect(self.request, fallback_url, **kwargs)
+
+    def after_signup(self, form):
+
+        self.create_profile(form)
+        super(CustomerSignupView, self).after_signup(form)    
+
+    def create_profile(self, form):
+        
+        profile = self.created_user.get_profile()   # type(profile) == Account.models.account
+        profile.save()
+
+        customer = Customer()
+        customer.account = profile
+        customer.save()
+
+    def email_confirmation_required_response(self):
+        if self.request.is_ajax():
+            template_name = self.template_name_email_confirmation_sent_ajax
+        else:
+            template_name = self.template_name_email_confirmation_sent
+        response_kwargs = {
+            "request": self.request,
+            "template": template_name,
+            "context": {
+                "email": self.created_user.email,
+                "success_url": self.get_success_url(),
+                "THEME_ACCOUNT_CONTACT_EMAIL": "info@HiveScribe.com"
+            }
+        }
+        return self.response_class(**response_kwargs)
+"""
+>>>>>>> bf11cba335b9912435806e2dd0252cfd7a470ac3
 
 class CustomerSignupView(account.views.SignupView):
 
@@ -162,6 +287,72 @@ class LoginView(account.views.LoginView):
 
 
 class ConfirmEmailView(account.views.ConfirmEmailView):
+#class ConfirmEmailView(TemplateResponseMixin, View):
+    print '----> ConfirmEmailView'
+
+    messages = {
+        "email_confirmed": {
+            "level": messages.SUCCESS,
+            "text": _("Welcome back to HiveScribe! You have confirmed %(email)s.")
+        }
+    }
+
+    """
+    def get_template_names(self):
+
+        print '----> get template_name'
+
+        return {
+            "GET": ["account/email_confirm.html"],
+            "POST": ["account/email_confirmed.html"],
+        }[self.request.method]
+    
+    def get(self, *args, **kwargs):
+        print '----> get from ConfirmEmailView'
+        self.object = self.get_object()
+        ctx = self.get_context_data()
+        return self.render_to_response(ctx)
+
+    def post(self, *args, **kwargs):
+        print '----> post @ ConfirmEmailView'
+        self.object = confirmation = self.get_object()
+        confirmation.confirm()
+        self.after_confirmation(confirmation)
+        redirect_url = self.get_redirect_url()
+        
+        print 'redirect_url'
+        print redirect_url
+
+        if not redirect_url:
+            ctx = self.get_context_data()
+            return self.render_to_response(ctx)
+        if self.messages.get("email_confirmed"):
+            messages.add_message(
+                self.request,
+                self.messages["email_confirmed"]["level"],
+                self.messages["email_confirmed"]["text"] % {
+                    "email": confirmation.email_address.email
+                }
+            )
+        return redirect(redirect_url)
+
+    def get_object(self, queryset=None):
+        if queryset is None:
+            queryset = self.get_queryset()
+        try:
+            return queryset.get(key=self.kwargs["key"].lower())
+        except EmailConfirmation.DoesNotExist:
+            raise Http404()
+
+    def get_queryset(self):
+        qs = EmailConfirmation.objects.all()
+        qs = qs.select_related("email_address__user")
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        ctx = kwargs
+        ctx["confirmation"] = self.object
+        return ctx
 
     def get_redirect_url(self):
         if self.request.user.is_authenticated():
@@ -173,6 +364,11 @@ class ConfirmEmailView(account.views.ConfirmEmailView):
         else:
             return settings.ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL
 
+    def after_confirmation(self, confirmation):
+        user = confirmation.email_address.user
+        user.is_active = True
+        user.save()
+    """    
 
 # Dashboard View for Customer
 class CustomerHomeView(View):
@@ -276,17 +472,47 @@ from datetime import timedelta
 from urllib2 import urlopen
 from xml.dom.minidom import parseString
 
+<<<<<<< HEAD
 """
+=======
+>>>>>>> bf11cba335b9912435806e2dd0252cfd7a470ac3
 class AddVideoView(FormView):
 
     template_name = 'add_video.html'
     form_class = VideoForm
-    success_url = '/customer_homepage/'      
+    success_url = '/customer_homepage/' 
+
+    messages = {
+        "not_enough_fund": {
+            "level": messages.INFO,
+            "text": _(u"Not Enough Fund. Please TOPUP.")
+        }
+    }     
 
     def form_valid(self, form):
         print '---> form_valid'
         video = self.create_video(form)
-        self.update_videoowner(video)
+
+        # Calculate the trancribtion cost (charge * video.videolength) and check whether customer has enough fund or not
+        # No, redirect to 'add fund' page
+        # Yes, keep proceeding       
+        customer = Customer.objects.get(account = self.request.user.get_profile())
+
+        if video.videourl:
+            if video.videolength <= 180:
+                charge = 15.00
+            else:
+                charge = video.videolength * 5.00 / 60
+        
+            if customer.fund -  Decimal(charge) < 0:
+                video.delete()
+                if self.messages.get("not_enough_fund"):
+                    messages.add_message(
+                        self.request,
+                        self.messages["not_enough_fund"]["level"],
+                        self.messages["not_enough_fund"]["text"], 
+                    )
+                return redirect('fund')       
 
         if video.videopath:
             print 'video path on local'
@@ -295,10 +521,21 @@ class AddVideoView(FormView):
 
             video.videolength = self.get_length(path)   # videolength in seconds
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> bf11cba335b9912435806e2dd0252cfd7a470ac3
             video.videopath = "http://s3.amazonaws.com/campcode" + path
             video.save()
-            
+
+            if video.videolength <= 180:
+                charge = 15.00
+            else:
+                charge = video.videolength * 5.00 / 60
+        
+            if customer.fund -  Decimal(charge) < 0:
+                video.delete()
+                return redirect('fund')            
             #self.s3_upload(path)       # Inner Class Method
             
             # upload.send(sender="upload", path = path)         # Django Signal
@@ -306,22 +543,38 @@ class AddVideoView(FormView):
             p = multiprocessing.Process(target=s3_upload, args=(self.request, path))
             p.start()
 
+<<<<<<< HEAD
+=======
+
+        self.update_videoowner(video)
+>>>>>>> bf11cba335b9912435806e2dd0252cfd7a470ac3
         #self.after_upload()
+        
         return super(AddVideoView, self).form_valid(form)
 
     #extract hours, minutes, seconds and milliseconds from string
 
     def get_length_yt(self, vid):
         url = 'https://gdata.youtube.com/feeds/api/videos/{0}?v=2'.format(vid)
+<<<<<<< HEAD
         # return int(parseString(urlopen(url).read()).getElementsByTagName('yt:duration')[0].attributes['second'])
 
+=======
+        #return int(parseString(urlopen(url).read()).getElementsByTagName('yt:duration')[0].attributes['seconds'])
+
+        
+>>>>>>> bf11cba335b9912435806e2dd0252cfd7a470ac3
         s = urlopen(url).read()
         d = parseString(s)
         e = d.getElementsByTagName('yt:duration')[0]
         a = e.attributes['seconds']
         v = int(a.value)
         return v
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> bf11cba335b9912435806e2dd0252cfd7a470ac3
     def seclength(self, timestring): 
         hh = int(timestring[0:2])
         mm = int(timestring[3:5])
@@ -348,9 +601,18 @@ class AddVideoView(FormView):
         )
 
         if video.videourl:
+<<<<<<< HEAD
             video.videolength = self.get_length_yt(self.get_vid_yt(form.cleaned_data.get("url")))
 
         video.save()
+=======
+
+            print 'user uploaded video by attaching a youtube link'
+            video.videolength = self.get_length_yt(self.get_vid_yt(form.cleaned_data.get("url")))
+        
+        video.save() 
+
+>>>>>>> bf11cba335b9912435806e2dd0252cfd7a470ac3
         return video
    
     def parse_url(self, url):
@@ -374,12 +636,19 @@ class AddVideoView(FormView):
         print '----> videoowner_update'
         customer = Customer.objects.get(account = self.request.user.get_profile())
         customer.videos.add(video)
+        if video.videolength <= 180:
+            charge = 15.00
+        else:
+            charge = video.videolength * 5.00 / 60
+
+        customer.fund = customer.fund - Decimal(charge)
         customer.save() 
 
         print '*' * 10
         print 'onwer of video'
         print customer
         print '*' * 10  
+<<<<<<< HEAD
                 
     # Broadcast video transcribing request to qualified transcriber (worker)    
     # Note: Check the existence of qualified worker
@@ -551,6 +820,8 @@ class AddVideoView(FormView):
         print 'onwer of video'
         print customer
         print '*' * 10  
+=======
+>>>>>>> bf11cba335b9912435806e2dd0252cfd7a470ac3
                 
     # Broadcast video transcribing request to qualified transcriber (worker)    
     # Note: Check the existence of qualified worker
@@ -627,9 +898,19 @@ class FundView(FormView):
 
 
     def get(self, *args, **kwargs):
+        print '---->Get from FundView'
+        print '*args'
+        print args
+        print '**kwargs'
+        print kwargs
         return super(FundView, self).get(*args, **kwargs)
 
     def post(self, *args, **kwargs):
+        print '---->Post on FundView'
+        print '*args'
+        print args
+        print '**kwargs'
+        print kwargs
         return super(FundView, self).post(*args, **kwargs) 
 
     def form_valid(self, form):
@@ -792,9 +1073,36 @@ class TranscribeView(FormView):
             video.videostate = "done"
             video.save()
 
+            # Attach worker to video 
+            worker = Worker.objects.get(account = self.request.user.get_profile())
+            worker.videos.add(video)
+            worker.save()
+
             print '*' * 10
             print 'The state of vidoe is Done'
             print '*' * 10
+
+            print 'Charge owner of video'
+            if video.videolength <= 180:
+                charge = 15.00
+            else:
+                charge = video.videolength * 5.00 / 60
+
+
+
+            customer = Customer.objects.get(videos = video)
+            
+            print 'found customer'
+            print customer
+            print 'available fund for ' 
+            print customer.fund
+            print 'transcribtion charge'
+            print Decimal(charge)
+
+            customer.fund -= Decimal(charge)
+            customer.save()
+
+            print 'Charged customer'
 
             return response
 
