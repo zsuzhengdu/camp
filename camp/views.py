@@ -33,11 +33,12 @@ from decimal import *
 
 COST_PER_MIN = 5.00
 RATE_PER_MIN = 1.50
+CUSTOMER_SHARE = 0.9
 
 class CustomerSignupView(account.views.SignupView):
 
 
-    THEME_ACCOUNT_CONTACT_EMAIL = "zsuzhengdu@gmail.com"
+    THEME_ACCOUNT_CONTACT_EMAIL = "info@HiveScribe.com"
     template_name = "customer_signup.html"
    #  template_name_ajax = "customer_signup.html"
 
@@ -75,6 +76,7 @@ class CustomerSignupView(account.views.SignupView):
         customer.save()
 
     def email_confirmation_required_response(self):
+        print '----> email email_confirmation_required_response'
         if self.request.is_ajax():
             template_name = self.template_name_email_confirmation_sent_ajax
         else:
@@ -88,6 +90,8 @@ class CustomerSignupView(account.views.SignupView):
                 "THEME_ACCOUNT_CONTACT_EMAIL": "info@HiveScribe.com"
             }
         }
+        print template_name
+        print response_kwargs["context"]
         return self.response_class(**response_kwargs)
 
 
@@ -401,7 +405,7 @@ class AddVideoView(FormView):
     messages = {
         "not_enough_fund": {
             "level": messages.INFO,
-            "text": _(u"Not Enough Fund. Please TOPUP.")
+            "text": _(u"You donot have enough fund in your account, please topup :).")
         }
     }     
 
@@ -414,6 +418,7 @@ class AddVideoView(FormView):
         # Yes, keep proceeding       
         customer = Customer.objects.get(account = self.request.user.get_profile())
 
+        """
         if video.videourl:
             if video.videolength <= 180:
                 charge = 15.00
@@ -429,8 +434,21 @@ class AddVideoView(FormView):
                         self.messages["not_enough_fund"]["level"],
                         self.messages["not_enough_fund"]["text"], 
                     )
-                return HttpResponseRedirect('/customer/fund')       
-            
+                return HttpResponseRedirect('/customer/fund')
+        """
+
+        if video.videourl:
+            if customer.fund - Decimal(video.videobid) < 0:
+                video.delete()
+                if self.messages.get("not_enough_fund"):
+                    messages.add_message(
+                        self.request,
+                        self.messages["not_enough_fund"]["level"],
+                        self.messages["not_enough_fund"]["text"], 
+                    )
+                return HttpResponseRedirect('/customer/fund')         
+
+        """
         if video.videopath:
             print 'video path on local'
             path = settings.MEDIA_ROOT + '/' + str(video.videopath)
@@ -447,6 +465,34 @@ class AddVideoView(FormView):
                 charge = video.videolength * 5.00 / 60
             
             if customer.fund -  Decimal(charge) < 0:
+                video.delete()
+                if self.messages.get("not_enough_fund"):
+                    messages.add_message(
+                        self.request,
+                        self.messages["not_enough_fund"]["level"],
+                        self.messages["not_enough_fund"]["text"], 
+                    )
+
+                return HttpResponseRedirect('/customer/fund')            
+            
+            #self.s3_upload(path)       # Inner Class Method
+            
+            # upload.send(sender="upload", path = path)         # Django Signal
+            
+            p = multiprocessing.Process(target=s3_upload, args=(self.request, path))
+            p.start()
+        """
+        if video.videopath:
+            print 'video path on local'
+            path = settings.MEDIA_ROOT + '/' + str(video.videopath)
+            print path
+
+            video.videolength = self.get_length(path)   # videolength in seconds
+
+            video.videopath = "http://s3.amazonaws.com/campcode" + path
+            video.save()
+
+            if customer.fund -  Decimal(video.videobid) < 0:
                 video.delete()
                 if self.messages.get("not_enough_fund"):
                     messages.add_message(
@@ -504,6 +550,7 @@ class AddVideoView(FormView):
             videoname = form.cleaned_data.get("videoname"),
             videopath = form.cleaned_data.get("path"),
             videourl = self.parse_url(form.cleaned_data.get("url")), 
+            videobid = form.cleaned_data.get("bid"),
             videolength = 0,  # set default video length        
             # Update state of video
             videostate = "uploaded"    

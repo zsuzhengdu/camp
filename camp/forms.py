@@ -12,8 +12,6 @@ from paypal.standard.widgets import ValueHiddenInput, ReservedValueHiddenInput
 from paypal.standard.conf import (POSTBACK_ENDPOINT, SANDBOX_POSTBACK_ENDPOINT, 
     RECEIVER_EMAIL)
 
-from camp.test import ExtFileField
-
 import account.forms
 from camp.models import Video
 import settings
@@ -62,7 +60,7 @@ class VideoForm(forms.Form):
 			if content._size > settings.MAX_UPLOAD_SIZE:
 				raise forms.ValidationError(_('The uploaded file size is bigger than 50 MB'))
 		else:
-			raise forms.ValidationError(_('Please upload video file, e.g. flv., mov. and mp4'))
+			raise forms.ValidationError(_('Please upload a video file with exention .flv, .mov or .mp4'))
 		return content	
 
 	#path = ExtFileField(ext_whitelist=(".flv", ".mov", "mp4"), label="File path for video", required=True)
@@ -82,6 +80,14 @@ class VideoForm(forms.Form):
 		return self.cleaned_data.get('url')
 
 	
+	bid = forms.FloatField(
+		label = "Bid",
+		max_value=1000,
+		min_value=15,
+		required=True
+	)
+	
+
 	"""	
 	VIDEO_AREA = (('0', '-------'), ('1', 'Technology'), ('2', 'Science'))
 

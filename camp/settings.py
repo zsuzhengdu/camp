@@ -15,6 +15,7 @@ AUTH_PROFILE_MODULE = 'account.Account'
 
 MANAGERS = ADMINS
 
+
 db_name = 'dev.db'
 db_path = PROJECT_ROOT + '/' + db_name
 
@@ -24,6 +25,22 @@ DATABASES = {
         "NAME": db_path,
     }
 }
+
+
+
+# setting for amazon RDS deployment
+"""
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',     # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'camp.db',                           # Or path to database file if using sqlite3.
+        'USER': 'root',                           # Not used with sqlite3.
+        'PASSWORD': 'cloudb2012',                 # Not used with sqlite3.
+        'HOST': 'cloudb.cpwbcwofdaxk.us-east-1.rds.amazonaws.com',       # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '3306',                               # Set to empty string for default. Not used with sqlite3.
+    }
+}
+"""
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -212,7 +229,7 @@ ACCOUNT_USE_OPENID = False
 ACCOUNT_REQUIRED_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = True
 ACCOUNT_EMAIL_AUTHENTICATION = True
-ACCOUNT_EMAIL_CONFIRMATION_REQUIRED = False
+ACCOUNT_EMAIL_CONFIRMATION_REQUIRED = True
 
 
 ACCOUNT_LOGIN_REDIRECT_URL = "home"
@@ -235,6 +252,7 @@ EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
 # DEFAULT_FROM_EMAIL = 'James Makienko <info@hivedirect.com>'
 DEFAULT_FROM_EMAIL = "James Makienko <info@hivedirect.com>"
 THEME_ACCOUNT_CONTACT_EMAIL = "info@hivedirect.com"
+THEME_CONTACT_EMAIL = "info@hivedirect.com"
 EMAIL_HOST = 'email-smtp.us-east-1.amazonaws.com'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'AKIAJB7SMH62R45HZ57Q'
