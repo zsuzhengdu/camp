@@ -28,7 +28,7 @@ class Video(models.Model):
 	videosource = models.CharField(max_length=256)
 	videourl = models.CharField(max_length=256)
 	videolength = models.IntegerField()
-	videobid = models.DecimalField(max_digits=5, decimal_places=2, default =0)		# $ customer would like to pay
+	videobid = models.FloatField(default =0)		# $ customer would like to pay
  	upload_date = models.DateTimeField(auto_now_add=True)					# Upload date
 	language = models.CharField(max_length=128)
 	note = models.TextField()
@@ -49,7 +49,7 @@ class Video(models.Model):
 	# portion = models.FloatField()	
 	# created_at = models.DateTimeField(auto_now_add=True)	# Calculating the monthly payment to worker,
 	
-	transcribtion = models.TextField()					# sub got from transcriber
+	transcription = models.TextField()					# sub got from transcriber
 	verification = models.TextField()								# sub got after verification
 	
 	#format = models.CharField(max_length=100)				# Format of video .srt 
@@ -68,7 +68,7 @@ class Video(models.Model):
 class Customer(models.Model):
 	account = models.OneToOneField(Account, verbose_name=("customer"))
 	videos = models.ManyToManyField(Video, blank=True)		# videos uploaded by customer
-	fund = models.DecimalField(max_digits=5, decimal_places=2, default =0)								# fund availdable (in String), right now customer pay by usage
+	fund = models.FloatField(default =0)								# fund availdable (in String), right now customer pay by usage
 	
 	def __unicode__(self):
 		return self.account.user.username
@@ -84,6 +84,8 @@ class Worker(models.Model):
 
 	level = models.IntegerField(null=True, blank=True)						# level that qualified worker
 	state = models.CharField(max_length=10)					# Current state of video  "idle --> busy --> idle"
+	total_earned = models.FloatField(default=0)
+	
 
 	def __unicode__(self):
 		return self.account.user.username

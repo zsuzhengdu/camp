@@ -100,7 +100,7 @@ def ipn(request, item_check_callable=None):
             print customer
             print customer.fund
             print customer.videos
-            customer.fund = customer.fund + Decimal(data['mc_gross'])
+            customer.fund = customer.fund + float(data['mc_gross'])
             customer.save()
     ipn_obj.save()
 

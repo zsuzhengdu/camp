@@ -12,7 +12,7 @@
 <ul>
     {% for video in videos %}
         {% if video.videostate != "done" %}
-        <li><a href={% url transcribe video.id %}>{{ video.videoname }} -- {{video.videostate}}</a></li>
+        <li><a href={% url transcribe video.id %}>{{ video.videoname }} -- You will make 50% of the customer's bid ${{ video.videobid|floatformat:2 }} for transcripting the video!</a></li>
         {% endif %}
     {% empty %}
         Sorry, right now there is not any video need translated! We will let you know at the first time!

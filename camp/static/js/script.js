@@ -13,6 +13,8 @@ $(document).ready(function(){
 	// http://docs.jquery.com/Plugins/Validation/
 	// http://docs.jquery.com/Plugins/Validation/validate#toptions
 
+	console.log('page loaded');
+
 		$('#topup-form').validate({
 	    rules: {
 	      

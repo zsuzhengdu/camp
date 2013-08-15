@@ -12,6 +12,12 @@ $(document).ready(function(){
 	// http://bassistance.de/jquery-plugins/jquery-plugin-validation/
 	// http://docs.jquery.com/Plugins/Validation/
 	// http://docs.jquery.com/Plugins/Validation/validate#toptions
+		/*
+		$('#cash-out').function(e) {
+			console.log('Was clicked');
+			alert("You will get your cashed money in 24 hrs. Please be patient.");
+		};
+		*/
 
 		$('#topup-form').validate({
 	    rules: {

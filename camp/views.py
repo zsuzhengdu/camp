@@ -33,7 +33,8 @@ from decimal import *
 
 COST_PER_MIN = 5.00
 RATE_PER_MIN = 1.50
-CUSTOMER_SHARE = 0.9
+CUSTOMER_SHARE = 0.5
+PERCENTAGE = 0.50
 
 class CustomerSignupView(account.views.SignupView):
 
@@ -192,6 +193,39 @@ class CustomerHomeView(View):
         
         return render_to_response('customer_homepage.html', {"customer": customer, 'video_done': video_done, "video_wip": video_wip, "request": self.request, "SITE_NAME": 'HiveScribe'})
         
+class CashOut(View):
+
+    messages = {
+        "not_enough_fund": {
+            "level": messages.INFO,
+            "text": _(u"You just cashed out. We will send it to you in 24 hrs")
+        }
+    }     
+
+    def get(self, *args, **kwargs):  
+
+        print '*' * 20
+        print 'Cash out'
+        
+        worker = Worker.objects.get(account = self.request.user.get_profile())
+
+        total_min = sum(video.videolength for video in worker.videos.all())
+
+        
+        money_cashed = '$' + "%.2f" % worker.total_earned
+        worker.total_earned = 0
+        worker.save() 
+        
+        subject = "Notification!!! " + worker.account.user.username + " wants to Cash out!"
+
+        message = "Please send " + money_cashed + " to following email " + worker.account.user.email + " Go to www.paypal.com."
+
+        #send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, ["james@hivedirect.com"])
+        print messages
+        
+        return HttpResponseRedirect('/worker_homepage/')
+
+
 
 class WorkerHomeView(View):
 
@@ -201,10 +235,9 @@ class WorkerHomeView(View):
 
         total_min = sum(video.videolength for video in worker.videos.all())
 
-        
-        total_earned = '$' + "%.2f" % (total_min * RATE_PER_MIN / 60)
+        # total_earned = sum(video.videobid for video in worker.videos.all()) / 2
 
-        ctx = {"worker": worker, "request": self.request, "SITE_NAME": 'HiveScribe', 'total_min': timedelta(seconds = total_min), 'video_completed': len(worker.videos.all()), 'total_earned': total_earned}
+        ctx = {"worker": worker, "request": self.request, "SITE_NAME": 'HiveScribe', 'total_min': timedelta(seconds = total_min), 'video_completed': len(worker.videos.all()), 'total_earned': worker.total_earned}
 
         return render_to_response('worker_homepage.html', ctx)
 
@@ -438,7 +471,7 @@ class AddVideoView(FormView):
         """
 
         if video.videourl:
-            if customer.fund - Decimal(video.videobid) < 0:
+            if customer.fund - video.videobid < 0:
                 video.delete()
                 if self.messages.get("not_enough_fund"):
                     messages.add_message(
@@ -492,7 +525,7 @@ class AddVideoView(FormView):
             video.videopath = "http://s3.amazonaws.com/campcode" + path
             video.save()
 
-            if customer.fund -  Decimal(video.videobid) < 0:
+            if customer.fund -  video.videobid < 0:
                 video.delete()
                 if self.messages.get("not_enough_fund"):
                     messages.add_message(
@@ -512,7 +545,9 @@ class AddVideoView(FormView):
 
 
         self.update_videoowner(video)
-        #self.after_upload()
+        
+        # Enable this to broadcast new uploaded video task to all workers
+        self.after_upload()
         
         return super(AddVideoView, self).form_valid(form)
 
@@ -591,7 +626,9 @@ class AddVideoView(FormView):
         else:
             charge = video.videolength * 5.00 / 60
 
-        customer.fund = customer.fund - Decimal(charge)
+        # customer.fund = customer.fund - Decimal(charge)
+        customer.fund = customer.fund - video.videobid
+        
         customer.save() 
 
         print '*' * 10
@@ -604,8 +641,14 @@ class AddVideoView(FormView):
     # Rewrite by using Django Signals in future
     def after_upload(self, **kwargs):
         
-        subject = "Here comes jobs!"
-        message = "Look, transcribing jobs!!!"
+        #subject = "Here comes jobs!"
+        
+        #message = "Look, transcribing jobs!!!"
+        
+        subject = "Video is available for transcription"
+
+        message = "Please visit http://hivescribe.com/worker_homepage/ and log in to work on the transcript."
+
         # Broadcast newly uploaded video info to 'qualified' workers, e.g, worker.level >= '10'
         for worker in Worker.objects.all():
             send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [worker.account.user.email])     
@@ -779,7 +822,7 @@ class TranscribeView(FormView):
             video = Video.objects.get(pk=self.kwargs.get('video_id', None))
             # 
             # someone checked video out and is editing video
-            #
+            #f\
 
             video.videostate = 'WIP'
             video.save()
@@ -787,6 +830,7 @@ class TranscribeView(FormView):
             worker = Worker.objects.get(account = self.request.user.get_profile())
             
             worker.videos.add(video)
+            worker.total_earned = worker.total_earned + video.videobid * PERCENTAGE
             worker.save()
 
             print '*' * 10
@@ -868,6 +912,7 @@ class TranscribeView(FormView):
         # video = Video.objection.get(videoname = self.request.videoname)
         # video.transcribtion = form.cleaned_data.get("transcribtion")    
 
+    ## send notification to video uploader
     def after_transcribe(self, **kwargs):
         # Notify all qualified QA
         subject = "Here comes jobs!"
@@ -878,7 +923,7 @@ class TranscribeView(FormView):
 
 class TranscribeListView(ListView):
     template_name = 'transcribe_list.html'
-    paginate_by = 5
+    paginate_by = 10
     context_object_name = 'videos'
     model = Video
      
